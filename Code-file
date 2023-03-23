@@ -1,0 +1,42 @@
+const Tesseract = require('tesseract.js');
+const fs = require('fs');
+
+// Load the image file
+const imageFile = fs.readFileSync('path/to/image');
+
+// Run OCR on the image
+Tesseract.recognize(imageFile, 'eng', {
+  // Set the language to English
+  tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+  // Specify the characters to allow
+})
+  .then((result) => {
+    // Extract the details from the OCR result
+    const extractedDetails = {
+      text: result.text.trim(),
+      // Trim any leading/trailing whitespace from the OCR result
+      confidence: result.confidence,
+      // The confidence score of the OCR result
+      lines: result.lines.map(line => ({
+        text: line.text.trim(),
+        // Trim any leading/trailing whitespace from the line
+        confidence: line.confidence,
+        // The confidence score of the line
+        words: line.words.map(word => ({
+          text: word.text,
+          // The text of the word
+          confidence: word.confidence,
+          // The confidence score of the word
+          box: word.bbox,
+          // The bounding box of the word in the image
+        })),
+      })),
+    };
+
+    // Log the extracted details to the console
+    console.log(JSON.stringify(extractedDetails, null, 2));
+  })
+  .catch((error) => {
+    // Log any errors to the console
+    console.error(error);
+  });
